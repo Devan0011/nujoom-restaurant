@@ -23,7 +23,7 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
 module.exports = {
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: process.env.PORT || 8000,
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseKey,
   jwtSecret: process.env.JWT_SECRET,
