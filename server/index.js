@@ -1,0 +1,130 @@
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+
+dotenv.config();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Make supabase available to routes
+app.set('supabase', supabase);
+
+// Routes
+const menuRoutes = require('./routes/menu');
+const reservationRoutes = require('./routes/reservation');
+const galleryRoutes = require('./routes/gallery');
+const reviewRoutes = require('./routes/reviews');
+const adminRoutes = require('./routes/admin');
+
+app.use('/api/menu', menuRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/gallery', galleryRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Nujoom Biriyani House API is running with Supabase' });
+});
+
+// Seed endpoint
+app.post('/api/seed', async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { v4: uuidv4 } = require('uuid');
+
+    // Create admin
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 12);
+    const { error: adminError } = await supabase
+      .from('admin_users')
+      .upsert([{
+        id: uuidv4(),
+        email: process.env.ADMIN_EMAIL || 'admin@nujoombiriyani.com',
+        password: hashedPassword,
+        name: 'Nujoom Admin',
+        role: 'superadmin'
+      }], { onConflict: 'email' });
+
+    if (adminError) throw adminError;
+
+    // Menu items
+    const menuItems = [
+      { name: 'Hyderabadi Chicken Biriyani', description: 'Slow-cooked aromatic rice layered with tender chicken, saffron, and traditional spices', price: 299, category: 'biriyani', is_featured: true, image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400', preparation_time: '25-35 min', spice_level: 'spicy' },
+      { name: 'Mutton Biriyani', description: 'Premium mutton pieces marinated overnight, cooked with aged basmati rice', price: 399, category: 'biriyani', is_featured: true, image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400', preparation_time: '30-40 min', spice_level: 'spicy' },
+      { name: 'Special Family Biriyani', description: 'Large portion biriyani with chicken, mutton, and egg for sharing', price: 599, category: 'biriyani', is_featured: true, image: 'https://images.unsplash.com/photo-1642821373181-696a54913e93?w=400', preparation_time: '35-45 min', spice_level: 'spicy' },
+      { name: 'Veg Biriyani', description: 'Aromatic basmati rice cooked with fresh vegetables and mild spices', price: 199, category: 'biriyani', is_featured: false, image: 'https://images.unsplash.com/photo-1642821373181-696a54913e93?w=400', preparation_time: '20-25 min', spice_level: 'mild' },
+      { name: 'Paneer Biriyani', description: 'Fragrant rice layered with marinated paneer cubes and spices', price: 249, category: 'biriyani', is_featured: false, image: 'https://images.unsplash.com/photo-1642821373181-696a54913e93?w=400', preparation_time: '20-25 min', spice_level: 'medium' },
+      { name: 'Chicken 65', description: 'Crispy fried chicken tossed with curry leaves, chilies, and spices', price: 189, category: 'starters', is_featured: true, image: 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=400', preparation_time: '15-20 min', spice_level: 'very-spicy' },
+      { name: 'Apollo Fish', description: 'Crispy fish pieces in spicy Indo-Chinese style', price: 229, category: 'starters', is_featured: false, image: 'https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=400', preparation_time: '15-20 min', spice_level: 'spicy' },
+      { name: 'Chicken Lollipop', description: 'Juicy chicken drumettes in hot and sweet sauce', price: 179, category: 'starters', is_featured: false, image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400', preparation_time: '15-20 min', spice_level: 'medium' },
+      { name: 'Butter Chicken', description: 'Tender chicken in rich tomato-butter gravy', price: 249, category: 'main-course', is_featured: true, image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400', preparation_time: '20-25 min', spice_level: 'medium' },
+      { name: 'Kadai Chicken', description: 'Chicken cooked with bell peppers in aromatic kadai masala', price: 229, category: 'main-course', is_featured: false, image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400', preparation_time: '20-25 min', spice_level: 'spicy' },
+      { name: 'Mutton Curry', description: 'Slow-cooked mutton in rich onion-tomato gravy', price: 299, category: 'main-course', is_featured: false, image: 'https://images.unsplash.com/photo-1545247181-516773cae754?w=400', preparation_time: '30-40 min', spice_level: 'spicy' },
+      { name: 'Gulab Jamun', description: 'Soft milk dumplings in rose-scented sugar syrup', price: 79, category: 'desserts', is_featured: false, image: 'https://images.unsplash.com/photo-1666190077617-7a07a77f1f9b?w=400', preparation_time: '10-15 min', spice_level: 'mild' },
+      { name: 'Fresh Lime Soda', description: 'Refreshing lime with soda and mint', price: 49, category: 'beverages', is_featured: false, image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400', preparation_time: '5 min', spice_level: 'mild' },
+    ];
+
+    // Clear and insert menu items
+    await supabase.from('menu_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: menuError } = await supabase.from('menu_items').insert(menuItems);
+    if (menuError) throw menuError;
+
+    // Gallery
+    const galleryImages = [
+      { title: 'Signature Chicken Biriyani', image_url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600', category: 'food', display_order: 1 },
+      { title: 'Restaurant Interior', image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600', category: 'interior', display_order: 2 },
+      { title: 'Mutton Biriyani', image_url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600', category: 'food', display_order: 3 },
+      { title: 'Spices Collection', image_url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=600', category: 'food', display_order: 4 },
+    ];
+    await supabase.from('gallery_images').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: galleryError } = await supabase.from('gallery_images').insert(galleryImages);
+    if (galleryError) throw galleryError;
+
+    // Reviews
+    const reviews = [
+      { name: 'Ahmed Khan', phone: '9876543210', rating: 5, review: 'The best biriyani I have ever had! Incredible flavors and generous portions.', is_approved: true },
+      { name: 'Fatima Beevi', phone: '9876543211', rating: 5, review: 'Authentic taste that reminds me of Hyderabad! The mutton biriyani is absolutely divine.', is_approved: true },
+      { name: 'Rajesh Kumar', phone: '9876543212', rating: 4, review: 'We celebrated our anniversary here and the experience was memorable.', is_approved: true },
+    ];
+    await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    const { error: reviewError } = await supabase.from('reviews').insert(reviews);
+    if (reviewError) throw reviewError;
+
+    res.json({ success: true, message: 'Database seeded successfully!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error seeding database: ' + error.message });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+app.get('/menu', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'menu.html'));
+});
+
+app.get('/admin/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin', 'login.html'));
+});
+
+app.get('/admin/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin', 'dashboard.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Connected to Supabase: ${supabaseUrl ? 'Yes' : 'No'}`);
+});

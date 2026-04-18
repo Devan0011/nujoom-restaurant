@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <title>Admin Dashboard | Nujoom Biriyani House</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="sidebar-logo">
+          <i class="fas fa-utensils"></i>
+          <span>Nujoom</span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" data-section="dashboard">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#menu" class="nav-item" data-section="menu">
+          <i class="fas fa-utensils"></i>
+          <span>Menu Items</span>
+        </a>
+        <a href="#reservations" class="nav-item" data-section="reservations">
+          <i class="fas fa-calendar-check"></i>
+          <span>Reservations</span>
+        </a>
+        <a href="#gallery" class="nav-item" data-section="gallery">
+          <i class="fas fa-images"></i>
+          <span>Gallery</span>
+        </a>
+        <a href="#reviews" class="nav-item" data-section="reviews">
+          <i class="fas fa-star"></i>
+          <span>Reviews</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="#" id="logout-btn" class="nav-item">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+        <a href="/" class="nav-item">
+          <i class="fas fa-external-link-alt"></i>
+          <span>View Website</span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="admin-header">
+        <div class="header-left">
+          <button class="mobile-toggle" id="mobile-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 id="page-title">Dashboard</h1>
+        </div>
+        <div class="header-right">
+          <span class="admin-name" id="admin-name">Admin</span>
+        </div>
+      </header>
+
+      <div class="admin-body">
+        <section id="dashboard" class="admin-section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-total">0</span>
+                <span class="stat-label">Total Bookings</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(76, 175, 80, 0.15); color: #4caf50;">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-pending">0</span>
+                <span class="stat-label">Pending</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(33, 150, 243, 0.15); color: #2196f3;">
+                <i class="fas fa-calendar-day"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-today">0</span>
+                <span class="stat-label">Today's Bookings</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(156, 39, 176, 0.15); color: #9c27b0;">
+                <i class="fas fa-calendar-alt"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-month">0</span>
+                <span class="stat-label">This Month</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="recent-section">
+            <div class="section-header">
+              <h2>Recent Reservations</h2>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="recent-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Guests</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-tbody">
+                  <tr>
+                    <td colspan="6" class="loading-cell">
+                      <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="menu" class="admin-section">
+          <div class="section-header">
+            <h2>Menu Items</h2>
+            <button class="btn btn-primary" id="add-menu-btn">
+              <i class="fas fa-plus"></i> Add Item
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="menu-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Spice Level</th>
+                  <th>Featured</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="menu-tbody">
+                <tr>
+                  <td colspan="8" class="loading-cell">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="reservations" class="admin-section">
+          <div class="section-header">
+            <h2>All Reservations</h2>
+            <div class="filter-group">
+              <select id="status-filter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
+              </select>
+              <input type="date" id="date-filter" class="filter-input">
+              <button class="btn btn-secondary" id="filter-btn">
+                <i class="fas fa-filter"></i> Filter
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="reservations-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Guests</th>
+                  <th>Special Requests</th>
+                  <th>Status</th>
+                  <th>Notify</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reservations-tbody">
+                <tr>
+                  <td colspan="10" class="loading-cell">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="gallery" class="admin-section">
+          <div class="section-header">
+            <h2>Gallery Images</h2>
+            <button class="btn btn-primary" id="add-gallery-btn">
+              <i class="fas fa-plus"></i> Add Image
+            </button>
+          </div>
+          <div class="gallery-admin-grid" id="gallery-admin-grid">
+            <div class="loading-gallery">
+              <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+          </div>
+        </section>
+
+        <section id="reviews" class="admin-section">
+          <div class="section-header">
+            <h2>Customer Reviews</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="reviews-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Rating</th>
+                  <th>Review</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reviews-tbody">
+                <tr>
+                  <td colspan="6" class="loading-cell">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal Title</h3>
+        <button class="modal-close" id="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <i class="toast-icon fas fa-check-circle"></i>
+    <span class="toast-message"></span>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
