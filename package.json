@@ -1,24 +1,24 @@
 {
   "name": "nujoom-restaurant-supabase",
   "version": "1.0.0",
-  "description": "Restaurant website for Nujoom Biriyani House - Railway + Netlify + Supabase",
+  "description": "Nujoom Biriyani House full-stack website (Express + Supabase)",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "dev": "nodemon server/index.js",
+    "seed": "node scripts/seed.js"
   },
   "keywords": [
     "restaurant",
     "biriyani",
-    "railway",
-    "netlify",
     "supabase"
   ],
   "author": "Nujoom Biriyani House",
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.0",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.3",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

@@ -1,6 +1,4 @@
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:3000/api'
-  : 'https://nujoom-restaurant-production.up.railway.app/api';
+const API_BASE_URL = window.getNujoomApiBaseUrl ? window.getNujoomApiBaseUrl() : '/api';
 
 let token = localStorage.getItem('adminToken');
 let adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
@@ -534,33 +532,27 @@ function openWhatsAppChat(whatsappUrl, status) {
 function sendWhatsAppNotification(reservationId, status) {
   const reservation = getReservationById(reservationId);
   if (!reservation) return;
-  
-  const statusMessages = {
-    confirmed: 'Your reservation has been confirmed',
-    cancelled: 'Your reservation has been cancelled',
-    pending: 'Reminder: Please confirm your reservation'
-  };
-  
+
   const date = new Date(reservation.date).toLocaleDateString('en-IN', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  
+
   let message = '';
   if (status === 'confirmed') {
-    message = `Hello ${reservation.name}! 🎉\n\nYour reservation at *Nujoom Biriyani House* has been *CONFIRMED*.\n\n📅 Date: ${date}\n⏰ Time: ${reservation.time}\n👥 Guests: ${reservation.guests}\n\nWe look forward to serving you!`;
+    message = `Hello ${reservation.name}!\n\nYour reservation at *Nujoom Biriyani House* has been *CONFIRMED*.\n\nDate: ${date}\nTime: ${reservation.time}\nGuests: ${reservation.guests}\n\nWe look forward to serving you!`;
   } else if (status === 'cancelled') {
     message = `Hello ${reservation.name},\n\nYour reservation at *Nujoom Biriyani House* for ${date} has been *CANCELLED*.\n\nWe hope to serve you another time!`;
   } else if (status === 'pending') {
-    message = `Hello ${reservation.name},\n\nReminder: Your reservation at *Nujoom Biriyani House* is still *PENDING*.\n\n📅 Date: ${date}\n⏰ Time: ${reservation.time}\n\nPlease call us to confirm your booking.`;
+    message = `Hello ${reservation.name},\n\nReminder: Your reservation at *Nujoom Biriyani House* is still *PENDING*.\n\nDate: ${date}\nTime: ${reservation.time}\n\nPlease call us to confirm your booking.`;
   }
-  
+
   const formattedPhone = formatPhoneForWhatsApp(reservation.phone);
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-  
+
   window.open(whatsappUrl, '_blank');
 }
 
@@ -893,3 +885,4 @@ function showToast(message, isError = false) {
     toast.classList.remove('show');
   }, 4000);
 }
+

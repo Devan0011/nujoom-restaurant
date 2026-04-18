@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="nujoom-api-base-url" content="">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <title>Admin Login | Nujoom Biriyani House</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -237,61 +238,7 @@
     }
   </style>
 
-  <script>
-    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:3000/api'
-      : 'https://nujoom-restaurant-production.up.railway.app/api';
-
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const btn = document.getElementById('login-btn');
-      const errorDiv = document.getElementById('form-error');
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      btn.classList.add('loading');
-      btn.disabled = true;
-      errorDiv.textContent = '';
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/admin/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          localStorage.setItem('adminToken', data.token);
-          localStorage.setItem('adminUser', JSON.stringify(data.admin));
-          window.location.href = '/admin/dashboard.html';
-        } else {
-          errorDiv.textContent = data.error || 'Invalid credentials';
-        }
-      } catch (error) {
-        errorDiv.textContent = 'Network error. Please try again.';
-      } finally {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-      }
-    });
-
-    document.querySelector('.toggle-password').addEventListener('click', function() {
-      const input = document.getElementById('password');
-      const icon = this.querySelector('i');
-      
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-      }
-    });
-  </script>
+  <script src="../js/config.js"></script>
+  <script src="js/login.js" defer></script>
 </body>
 </html>

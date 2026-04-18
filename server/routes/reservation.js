@@ -3,8 +3,6 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
-const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || '919876543210';
-
 const getSupabase = (req) => req.app.get('supabase');
 
 const transformReservation = (item) => ({
@@ -108,6 +106,8 @@ router.get('/', auth, async (req, res) => {
   try {
     const supabase = getSupabase(req);
     const { status, date, page = 1, limit = 20 } = req.query;
+    const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+    const limitNumber = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
 
     let query = supabase.from('reservations').select('*', { count: 'exact' });
 
@@ -118,19 +118,19 @@ router.get('/', auth, async (req, res) => {
       query = query.eq('date', date);
     }
 
-    const from = (page - 1) * limit;
+    const from = (pageNumber - 1) * limitNumber;
     const { data, error, count } = await query
       .order('date', { ascending: false })
       .order('time', { ascending: true })
-      .range(from, from + limit - 1);
+      .range(from, from + limitNumber - 1);
 
     if (error) throw error;
 
     res.json({
       reservations: data.map(transformReservation),
       total: count || data.length,
-      page: parseInt(page),
-      pages: Math.ceil((count || data.length) / limit)
+      page: pageNumber,
+      pages: Math.ceil((count || data.length) / limitNumber)
     });
   } catch (error) {
     console.error('Reservations fetch error:', error);
@@ -168,6 +168,25 @@ router.get('/stats', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   try {
     const supabase = getSupabase(req);
+    const updates = {};
+
+    if (typeof req.body.status === 'string') updates.status = req.body.status;
+    if (typeof req.body.name === 'string') updates.name = req.body.name;
+    if (typeof req.body.phone === 'string') updates.phone = req.body.phone;
+    if (typeof req.body.email === 'string') updates.email = req.body.email;
+    if (typeof req.body.date === 'string') updates.date = req.body.date;
+    if (typeof req.body.time === 'string') updates.time = req.body.time;
+    if (typeof req.body.guests === 'number') updates.guests = req.body.guests;
+    if (typeof req.body.guests === 'string' && req.body.guests.trim() !== '') {
+      const guests = parseInt(req.body.guests, 10);
+      if (!Number.isNaN(guests)) updates.guests = guests;
+    }
+    if (typeof req.body.specialRequests === 'string') updates.special_requests = req.body.specialRequests;
+    if (typeof req.body.special_requests === 'string') updates.special_requests = req.body.special_requests;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No valid fields provided for update.' });
+    }
 
     const { data: oldReservation, error: fetchError } = await supabase
       .from('reservations')
@@ -181,7 +200,7 @@ router.put('/:id', auth, async (req, res) => {
 
     const { data, error } = await supabase
       .from('reservations')
-      .update(req.body)
+      .update(updates)
       .eq('id', req.params.id)
       .select()
       .single();
@@ -190,13 +209,13 @@ router.put('/:id', auth, async (req, res) => {
 
     const response = { reservation: transformReservation(data) };
 
-    if (req.body.status && req.body.status !== oldReservation.status) {
+    if (updates.status && updates.status !== oldReservation.status) {
       const statusToNotify = ['confirmed', 'cancelled', 'pending'];
-      if (statusToNotify.includes(req.body.status)) {
-        const message = generateStatusMessage(data, req.body.status);
+      if (statusToNotify.includes(updates.status)) {
+        const message = generateStatusMessage(data, updates.status);
         response.whatsappUrl = generateWhatsAppUrl(data.phone, message);
         response.shouldNotify = true;
-        response.notificationStatus = req.body.status;
+        response.notificationStatus = updates.status;
       }
     }
 

@@ -70,13 +70,18 @@ router.post('/', auth, async (req, res) => {
   try {
     const supabase = getSupabase(req);
     const { name, description, price, category, image, spiceLevel, preparationTime, isFeatured, isAvailable } = req.body;
+    const parsedPrice = Number(price);
+
+    if (!name || !description || !category || Number.isNaN(parsedPrice)) {
+      return res.status(400).json({ error: 'Name, description, category and valid price are required.' });
+    }
     
     const { data, error } = await supabase
       .from('menu_items')
       .insert([{
         name,
         description,
-        price,
+        price: parsedPrice,
         category,
         image: image || '',
         spice_level: spiceLevel || 'medium',
@@ -100,13 +105,18 @@ router.put('/:id', auth, async (req, res) => {
   try {
     const supabase = getSupabase(req);
     const { name, description, price, category, image, spiceLevel, preparationTime, isFeatured, isAvailable } = req.body;
+    const parsedPrice = Number(price);
+
+    if (!name || !description || !category || Number.isNaN(parsedPrice)) {
+      return res.status(400).json({ error: 'Name, description, category and valid price are required.' });
+    }
     
     const { data, error } = await supabase
       .from('menu_items')
       .update({
         name,
         description,
-        price,
+        price: parsedPrice,
         category,
         image: image || '',
         spice_level: spiceLevel || 'medium',

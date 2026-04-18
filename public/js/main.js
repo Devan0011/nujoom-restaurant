@@ -1,6 +1,4 @@
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:3000/api'
-  : 'https://nujoom-restaurant-production.up.railway.app/api';
+const API_BASE_URL = window.getNujoomApiBaseUrl ? window.getNujoomApiBaseUrl() : '/api';
 
 let allMenuItems = [];
 

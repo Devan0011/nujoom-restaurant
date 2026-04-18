@@ -17,6 +17,7 @@ router.post('/login', [
     }
 
     const supabase = getSupabase(req);
+    const config = req.app.get('config');
     const { email, password } = req.body;
 
     const { data: admin, error } = await supabase
@@ -42,8 +43,8 @@ router.post('/login', [
 
     const token = jwt.sign(
       { adminId: admin.id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
+      config.jwtSecret,
+      { expiresIn: config.jwtExpire }
     );
 
     res.json({
@@ -61,16 +62,39 @@ router.post('/login', [
   }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', [
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+  body('name').optional().isLength({ min: 2 }).withMessage('Name must be at least 2 characters long'),
+], async (req, res) => {
   try {
-    const supabase = getSupabase(req);
-    const { email, password, name } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-    const { data: existingAdmin } = await supabase
+    const supabase = getSupabase(req);
+    const config = req.app.get('config');
+    const { email, password, name } = req.body;
+    const setupToken = req.header('x-setup-token') || '';
+
+    if (!config.adminSetupToken) {
+      return res.status(403).json({ error: 'Admin registration is disabled. Set ADMIN_SETUP_TOKEN to enable.' });
+    }
+
+    if (setupToken !== config.adminSetupToken) {
+      return res.status(403).json({ error: 'Invalid setup token.' });
+    }
+
+    const { data: existingAdmin, error: existingAdminError } = await supabase
       .from('admin_users')
       .select('id')
       .eq('email', email.toLowerCase())
       .single();
+
+    if (existingAdminError && existingAdminError.code !== 'PGRST116') {
+      throw existingAdminError;
+    }
 
     if (existingAdmin) {
       return res.status(400).json({ error: 'Admin already exists' });
@@ -101,13 +125,14 @@ router.post('/register', async (req, res) => {
 router.get('/verify', async (req, res) => {
   try {
     const supabase = getSupabase(req);
+    const config = req.app.get('config');
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
       return res.status(401).json({ valid: false });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwtSecret);
 
     const { data: admin } = await supabase
       .from('admin_users')

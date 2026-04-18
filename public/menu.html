@@ -8,7 +8,8 @@
   <meta name="author" content="Nujoom Biriyani House">
   <meta property="og:title" content="Nujoom Biriyani House | Menu">
   <meta property="og:description" content="Explore our complete menu of authentic biriyanis and Hyderabadi cuisine.">
-  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <meta name="nujoom-api-base-url" content="">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>Nujoom Biriyani House | Menu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,8 +54,7 @@
         <button class="menu-tab" data-category="desserts">Desserts</button>
         <button class="menu-tab" data-category="beverages">Beverages</button>
       </div>
-      <div class="menu-grid" id="menu-grid">
-      </div>
+      <div class="menu-grid" id="menu-grid"></div>
       <div class="menu-loading" id="menu-loading">
         <i class="fas fa-spinner fa-spin"></i>
         <span>Loading menu...</span>
@@ -109,77 +109,7 @@
     }
   </style>
 
-  <script>
-    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:3000/api'
-      : 'https://nujoom-restaurant-production.up.railway.app/api';
-    let allMenuItems = [];
-
-    async function fetchMenuItems() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/menu`);
-        const items = await response.json();
-        allMenuItems = items;
-        renderMenuItems(items);
-      } catch (error) {
-        document.getElementById('menu-loading').innerHTML = '<p>Failed to load menu</p>';
-      }
-    }
-
-    function getSpiceEmoji(level) {
-      const map = {
-        'mild': '<i class="fas fa-seedling"></i>',
-        'medium': '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i>',
-        'spicy': '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i>',
-        'very-spicy': '<i class="fas fa-fire"></i>'
-      };
-      return map[level] || map['medium'];
-    }
-
-    function renderMenuItems(items) {
-      const grid = document.getElementById('menu-grid');
-      const loading = document.getElementById('menu-loading');
-      loading.style.display = 'none';
-      
-      if (items.length === 0) {
-        grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-muted);">No items found</p>';
-        return;
-      }
-
-      grid.innerHTML = items.map(item => `
-        <div class="menu-card">
-          <div class="menu-card-image">
-            <img src="${item.image || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200'}" alt="${item.name}" loading="lazy">
-          </div>
-          <div class="menu-card-content">
-            <div class="menu-card-header">
-              <h3>${item.name}</h3>
-              <span class="menu-price">₹${item.price}</span>
-            </div>
-            <p>${item.description}</p>
-            <div class="menu-card-footer">
-              <span class="menu-time"><i class="far fa-clock"></i> ${item.preparationTime}</span>
-              <span class="spice-badge ${item.spiceLevel}">${getSpiceEmoji(item.spiceLevel)}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    document.querySelectorAll('.menu-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const category = tab.dataset.category;
-        if (category === 'all') {
-          renderMenuItems(allMenuItems);
-        } else {
-          renderMenuItems(allMenuItems.filter(item => item.category === category));
-        }
-      });
-    });
-
-    fetchMenuItems();
-  </script>
+  <script src="js/config.js"></script>
+  <script src="js/menu-page.js" defer></script>
 </body>
 </html>
