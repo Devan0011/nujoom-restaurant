@@ -229,7 +229,7 @@ function initMenuTabs() {
   });
 }
 
-const WHATSAPP_NUMBER = window.SITE_CONFIG ? window.SITE_CONFIG.whatsapp : "9876543210";
+const WHATSAPP_NUMBER = window.SITE_CONFIG ? window.SITE_CONFIG.whatsapp : "8848541003";
 const RESERVATION_TEXT = window.SITE_CONFIG ? window.SITE_CONFIG.reservationMessage : (data) => `*New Table Reservation*`;
 const REVIEW_TEXT = window.SITE_CONFIG ? window.SITE_CONFIG.reviewMessage : (data) => `*New Review*`;
 
