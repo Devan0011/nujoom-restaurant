@@ -104,7 +104,7 @@ app.get('/api/reservations', (req, res) => {
 app.post('/api/reservations', (req, res) => {
   const { name, phone, email, date, time, guests, specialRequests } = req.body;
   
-  db.addReservation({ name, phone, email, date, time, guests, specialRequests, status: 'pending' });
+  db.addReservation({ name, phone, email, date, time, guests, specialRequests, status: 'received' });
   res.json({ message: 'Reservation submitted successfully!' });
 });
 
@@ -121,13 +121,34 @@ app.put('/api/admin/reservations/:id', authenticateToken, (req, res) => {
   
   let whatsappLink = null;
   if (notifyCustomer && reservation.phone) {
-    const statusMessages = {
-      'confirmed': `Your table reservation at ${config.site.name} for ${reservation.date} at ${reservation.time} has been CONFIRMED! We look forward to serving you.`,
-      'completed': `Your reservation at ${config.site.name} for ${reservation.date} has been completed. Thank you for dining with us!`,
-      'cancelled': `Your table reservation at ${config.site.name} for ${reservation.date} has been cancelled. Please contact us if you need to reschedule.`
+    const allStatuses = {
+      'received': {
+        message: `We have received your table reservation request at ${config.site.name} for ${reservation.date} at ${reservation.time}. Your booking is under review.`,
+        label: 'Received'
+      },
+      'confirmed': {
+        message: `Great news! Your table at ${config.site.name} for ${reservation.date} at ${reservation.time} has been CONFIRMED! See you soon.`,
+        label: 'Confirmed'
+      },
+      'ready': {
+        message: `Your table is ready at ${config.site.name}! Please proceed to your seat. We are excited to serve you.`,
+        label: 'Table Ready'
+      },
+      'serving': {
+        message: `Your order is being prepared at ${config.site.name}. Our chefs are working on your delicious meal!`,
+        label: 'Serving'
+      },
+      'completed': {
+        message: `Thank you for dining at ${config.site.name}! We hope you enjoyed your meal. Looking forward to seeing you again!`,
+        label: 'Completed'
+      },
+      'cancelled': {
+        message: `Your table reservation at ${config.site.name} for ${reservation.date} has been cancelled. Please contact us if you need to reschedule.`,
+        label: 'Cancelled'
+      }
     };
-    const message = statusMessages[status] || `Your reservation status has been updated to: ${status}`;
-    const encodedMsg = encodeURIComponent(message);
+    const statusInfo = allStatuses[status] || { message: `Your reservation status is now: ${status}`, label: status };
+    const encodedMsg = encodeURIComponent(statusInfo.message);
     whatsappLink = `https://wa.me/91${reservation.phone}?text=${encodedMsg}`;
   }
   

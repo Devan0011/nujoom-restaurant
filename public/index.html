@@ -585,10 +585,12 @@
             statusList.innerHTML = '<p>No reservations found with this phone number.</p>';
           } else {
             const statusBadges = {
-              'pending': '<span style="background:#fef3cd;color:#856404;padding:3px 10px;border-radius:10px;font-size:12px;">Pending</span>',
-              'confirmed': '<span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:10px;font-size:12px;">Confirmed</span>',
-              'completed': '<span style="background:#cce5ff;color:#004085;padding:3px 10px;border-radius:10px;font-size:12px;">Completed</span>',
-              'cancelled': '<span style="background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:10px;font-size:12px;">Cancelled</span>'
+              'received': '<span style="background:#7c5cdf;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Received</span>',
+              'confirmed': '<span style="background:#27ae60;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Confirmed</span>',
+              'ready': '<span style="background:#f39c12;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Table Ready</span>',
+              'serving': '<span style="background:#3498db;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Serving</span>',
+              'completed': '<span style="background:#95a5a6;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Completed</span>',
+              'cancelled': '<span style="background:#e74c3c;color:white;padding:3px 10px;border-radius:10px;font-size:12px;">Cancelled</span>'
             };
             statusList.innerHTML = data.map(r => `
               <div style="padding:15px;border-bottom:1px solid #eee;">

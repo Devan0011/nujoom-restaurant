@@ -362,21 +362,39 @@
 
     async function loadReservations() {
       const reservations = await fetch(`${API_BASE}/reservations`).then(r => r.json());
+      const statusOptions = {
+        'received': 'Received',
+        'confirmed': 'Confirmed',
+        'ready': 'Table Ready',
+        'serving': 'Serving',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled'
+      };
+      const statusColors = {
+        'received': '#7c5cdf',
+        'confirmed': '#27ae60',
+        'ready': '#f39c12',
+        'serving': '#3498db',
+        'completed': '#95a5a6',
+        'cancelled': '#e74c3c'
+      };
       document.getElementById('reservationsTable').innerHTML = reservations.map(r => `
         <tr>
           <td>${r.name}</td>
           <td>${r.phone}</td>
-          <td>${r.date}</td>
-          <td>${r.time}</td>
+          <td>${r.date}<br>${r.time}</td>
           <td>${r.guests}</td>
-          <td><span class="badge ${r.status}">${r.status}</span></td>
-          <td style="display:flex;gap:5px;flex-wrap:wrap;">
-            <button class="btn btn-success" style="padding:5px 10px;font-size:12px;" onclick="updateReservation(${r.id}, 'confirmed', true)">✓ Confirm</button>
-            <button class="btn" style="padding:5px 10px;font-size:12px;background:#666;" onclick="updateReservation(${r.id}, 'completed', true)">✓ Done</button>
-            <button class="btn btn-danger" style="padding:5px 10px;font-size:12px;" onclick="deleteReservation(${r.id})"><i class="fas fa-trash"></i></button>
+          <td><span class="badge ${r.status}" style="background:${statusColors[r.status] || '#666'};color:white;">${statusOptions[r.status] || r.status}</span></td>
+          <td style="display:flex;gap:3px;flex-wrap:wrap;min-width:200px;">
+            <button class="btn" style="padding:4px 6px;font-size:10px;background:#7c5cdf;" onclick="updateReservation(${r.id}, 'received', true)" title="Mark as Received">📥</button>
+            <button class="btn btn-success" style="padding:4px 6px;font-size:10px;" onclick="updateReservation(${r.id}, 'confirmed', true)" title="Confirm">✓</button>
+            <button class="btn" style="padding:4px 6px;font-size:10px;background:#f39c12;" onclick="updateReservation(${r.id}, 'ready', true)" title="Table Ready">🪑</button>
+            <button class="btn" style="padding:4px 6px;font-size:10px;background:#3498db;" onclick="updateReservation(${r.id}, 'serving', true)" title="Serving">🍽️</button>
+            <button class="btn" style="padding:4px 6px;font-size:10px;background:#95a5a6;" onclick="updateReservation(${r.id}, 'completed', true)" title="Completed">✓</button>
+            <button class="btn btn-danger" style="padding:4px 6px;font-size:10px;" onclick="updateReservation(${r.id}, 'cancelled', true)" title="Cancel">✕</button>
           </td>
         </tr>
-      `).join('') || '<tr><td colspan="7" class="empty">No reservations yet</td></tr>';
+      `).join('') || '<tr><td colspan="6" class="empty">No reservations yet</td></tr>';
     }
 
     function openMenuModal(item = null) {
