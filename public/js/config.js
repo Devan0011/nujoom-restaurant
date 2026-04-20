@@ -9,7 +9,7 @@ const SITE_CONFIG = {
   tagline: "Authentic Biriyani in Palakkad",
   
   // Phone numbers (without +91)
-  phone: "8848541003",
+  phone: "+918848541003",
   whatsapp: "8848541003",  // Just the number without country code
   
   // Address
@@ -25,12 +25,6 @@ const SITE_CONFIG = {
   timing: "11:00 AM - 11:00 PM",
   
   // WhatsApp message templates
-  reservationMessage: (data) => 
-    `*New Table Reservation Request*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone}%0A*Email:* ${data.email || 'N/A'}%0A*Date:* ${data.date}%0A*Time:* ${data.time}%0A*Guests:* ${data.guests}%0A*Special Requests:* ${data.specialRequests || 'None'}`,
-  
-  reviewMessage: (data) => 
-    `*New Customer Review*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone || 'N/A'}%0A*Rating:* ${data.rating} Stars%0A*Review:* ${data.review}`,
-  
   getWhatsAppUrl: (message) => `https://wa.me/91${SITE_CONFIG.whatsapp}?text=${message}`,
   
   getPhoneLink: () => `tel:${SITE_CONFIG.phone}`,
