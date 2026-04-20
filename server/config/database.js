@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const config = require('../config');
 
 const DB_PATH = path.join(__dirname, '..', 'database.json');
 
@@ -45,7 +46,7 @@ const defaultData = {
   ],
   reservations: [],
   admin: [
-    { id: 1, username: "admin", password: bcrypt.hashSync("admin123", 10) }
+    { id: 1, username: config.admin.username, password: bcrypt.hashSync(config.admin.password, 10) }
   ]
 };
 
@@ -53,6 +54,17 @@ let data;
 
 if (fs.existsSync(DB_PATH)) {
   data = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  // Update admin credentials if changed in config
+  if (data.admin && data.admin[0]) {
+    const currentHash = data.admin[0].password;
+    const newHash = bcrypt.hashSync(config.admin.password, 10);
+    if (currentHash !== newHash) {
+      data.admin[0].username = config.admin.username;
+      data.admin[0].password = newHash;
+      saveData();
+      console.log('Admin credentials updated');
+    }
+  }
 } else {
   data = defaultData;
   saveData();

@@ -266,8 +266,6 @@ function initReservationForm() {
       const result = await response.json();
 
       if (response.ok) {
-        const whatsappUrl = `https://wa.me/91${WHATSAPP_NUMBER}?text=${RESERVATION_TEXT(data)}`;
-        window.open(whatsappUrl, '_blank');
         showToast(result.message || 'Reservation submitted successfully!');
         reservationForm.reset();
       } else {
@@ -326,8 +324,6 @@ function initReviewForm() {
         showToast(result.error || 'Failed to submit review', true);
       }
     } catch (error) {
-      const whatsappUrl = `https://wa.me/91${WHATSAPP_NUMBER}?text=${REVIEW_TEXT(data)}`;
-      window.open(whatsappUrl, '_blank');
       showToast('Thank you for your feedback!');
       reviewForm.reset();
     } finally {

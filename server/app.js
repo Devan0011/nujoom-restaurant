@@ -2,10 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const db = require('./config/database');
+const config = require('./config');
 
 const app = express();
-const JWT_SECRET = process.env.JWT_SECRET || 'nujoom-secret-key-change-in-production';
 const publicDirectory = path.join(__dirname, '..', 'public');
 
 app.use(cors());
@@ -18,7 +19,7 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Access denied' });
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, config.jwtSecret, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
@@ -29,11 +30,11 @@ app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
   const admin = db.getAdmin(username);
   
-  if (!admin || !require('bcryptjs').compareSync(password, admin.password)) {
+  if (!admin || !bcrypt.compareSync(password, admin.password)) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: admin.id, username: admin.username }, config.jwtSecret, { expiresIn: '7d' });
   res.json({ token, username: admin.username });
 });
 
@@ -116,6 +117,10 @@ app.put('/api/admin/reservations/:id', authenticateToken, (req, res) => {
 app.delete('/api/admin/reservations/:id', authenticateToken, (req, res) => {
   db.deleteReservation(parseInt(req.params.id));
   res.json({ message: 'Reservation deleted' });
+});
+
+app.get('/api/site', (req, res) => {
+  res.json(config.site);
 });
 
 app.get('/', (req, res) => {
