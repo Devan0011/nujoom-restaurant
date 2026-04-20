@@ -229,9 +229,9 @@ function initMenuTabs() {
   });
 }
 
-const WHATSAPP_NUMBER = "919876543210";
-const RESERVATION_TEXT = (data) => `*New Table Reservation Request*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone}%0A*Email:* ${data.email || 'N/A'}%0A*Date:* ${data.date}%0A*Time:* ${data.time}%0A*Guests:* ${data.guests}%0A*Special Requests:* ${data.specialRequests || 'None'}`;
-const REVIEW_TEXT = (data) => `*New Customer Review*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone || 'N/A'}%0A*Rating:* ${data.rating} Stars%0A*Review:* ${data.review}`;
+const WHATSAPP_NUMBER = window.SITE_CONFIG ? window.SITE_CONFIG.whatsapp : "9876543210";
+const RESERVATION_TEXT = window.SITE_CONFIG ? window.SITE_CONFIG.reservationMessage : (data) => `*New Table Reservation*`;
+const REVIEW_TEXT = window.SITE_CONFIG ? window.SITE_CONFIG.reviewMessage : (data) => `*New Review*`;
 
 function initReservationForm() {
   const reservationForm = document.getElementById('reservation-form');
@@ -266,7 +266,7 @@ function initReservationForm() {
       const result = await response.json();
 
       if (response.ok) {
-        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${RESERVATION_TEXT(data)}`;
+        const whatsappUrl = `https://wa.me/91${WHATSAPP_NUMBER}?text=${RESERVATION_TEXT(data)}`;
         window.open(whatsappUrl, '_blank');
         showToast(result.message || 'Reservation submitted successfully!');
         reservationForm.reset();
@@ -326,7 +326,7 @@ function initReviewForm() {
         showToast(result.error || 'Failed to submit review', true);
       }
     } catch (error) {
-      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${REVIEW_TEXT(data)}`;
+      const whatsappUrl = `https://wa.me/91${WHATSAPP_NUMBER}?text=${REVIEW_TEXT(data)}`;
       window.open(whatsappUrl, '_blank');
       showToast('Thank you for your feedback!');
       reviewForm.reset();
