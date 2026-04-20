@@ -19,8 +19,8 @@ module.exports = {
   // Site Details (used in API responses)
   site: {
     name: 'Nujoom Biriyani House',
-    phone: '04912521234',
-    whatsapp: '9876543210',
+    phone: '8848541003',
+    whatsapp: '8848541003',
     address: 'Main Road, Near Clock Tower',
     city: 'Palakkad',
     state: 'Kerala',

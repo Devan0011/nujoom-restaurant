@@ -109,9 +109,33 @@ app.post('/api/reservations', (req, res) => {
 });
 
 app.put('/api/admin/reservations/:id', authenticateToken, (req, res) => {
-  const { status } = req.body;
-  db.updateReservation(parseInt(req.params.id), status);
-  res.json({ message: 'Reservation updated' });
+  const { id } = req.params;
+  const { status, notifyCustomer } = req.body;
+  const reservation = db.getReservations().find(r => r.id === parseInt(id));
+  
+  if (!reservation) {
+    return res.status(404).json({ error: 'Reservation not found' });
+  }
+  
+  db.updateReservation(parseInt(id), status);
+  
+  let whatsappLink = null;
+  if (notifyCustomer && reservation.phone) {
+    const statusMessages = {
+      'confirmed': `Your table reservation at ${config.site.name} for ${reservation.date} at ${reservation.time} has been CONFIRMED! We look forward to serving you.`,
+      'completed': `Your reservation at ${config.site.name} for ${reservation.date} has been completed. Thank you for dining with us!`,
+      'cancelled': `Your table reservation at ${config.site.name} for ${reservation.date} has been cancelled. Please contact us if you need to reschedule.`
+    };
+    const message = statusMessages[status] || `Your reservation status has been updated to: ${status}`;
+    const encodedMsg = encodeURIComponent(message);
+    whatsappLink = `https://wa.me/91${reservation.phone}?text=${encodedMsg}`;
+  }
+  
+  res.json({ 
+    message: 'Reservation updated',
+    whatsappLink: whatsappLink,
+    notificationSent: !!whatsappLink
+  });
 });
 
 app.delete('/api/admin/reservations/:id', authenticateToken, (req, res) => {
@@ -121,6 +145,15 @@ app.delete('/api/admin/reservations/:id', authenticateToken, (req, res) => {
 
 app.get('/api/site', (req, res) => {
   res.json(config.site);
+});
+
+app.get('/api/reservations/check', (req, res) => {
+  const { phone } = req.query;
+  if (!phone) {
+    return res.status(400).json({ error: 'Phone number required' });
+  }
+  const reservations = db.getReservations().filter(r => r.phone === phone);
+  res.json(reservations);
 });
 
 app.get('/', (req, res) => {

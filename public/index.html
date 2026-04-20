@@ -39,6 +39,7 @@
         <li><a href="#menu" class="nav-link">Menu</a></li>
         <li><a href="#gallery" class="nav-link">Gallery</a></li>
         <li><a href="#reviews" class="nav-link">Reviews</a></li>
+        <li><a href="#status" class="nav-link">Check Status</a></li>
         <li><a href="#contact" class="nav-link shade">Contact</a></li>
         <li><a href="#reservation" class="btn-reserve">Book Table</a></li>
       </ul>
@@ -433,6 +434,33 @@
     </div>
   </section>
 
+  <section id="status" class="reservation">
+    <div class="container">
+      <div class="reservation-content">
+        <div class="reservation-info">
+          <span class="section-subtitle">Track Your Booking</span>
+          <h2 class="section-title">Check Reservation Status</h2>
+          <p>Enter your phone number to check your table reservation status.</p>
+        </div>
+        <form class="reservation-form" id="status-form">
+          <div class="form-group">
+            <label for="status-phone">Phone Number</label>
+            <input type="tel" id="status-phone" required placeholder="Enter phone number">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">
+            <i class="fas fa-search"></i> Check Status
+          </button>
+        </form>
+        <div id="status-result" style="margin-top:20px;display:none;">
+          <div class="contact-card" style="text-align:left;">
+            <h3>Your Reservations</h3>
+            <div id="status-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="contact" class="contact">
     <div class="container">
       <div class="section-header">
@@ -535,6 +563,49 @@
     // Initialize WhatsApp link
     document.getElementById('whatsapp-float-link').href = window.SITE_CONFIG.getWhatsAppLink();
   </script>
-  <script src="js/main.js"></script>
+<script src="js/main.js"></script>
+  <script>
+    // Initialize WhatsApp link
+    document.getElementById('whatsapp-float-link').href = window.SITE_CONFIG.getWhatsAppLink();
+    
+    // Reservation Status Check
+    const statusForm = document.getElementById('status-form');
+    if (statusForm) {
+      statusForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('status-phone').value.trim();
+        const statusResult = document.getElementById('status-result');
+        const statusList = document.getElementById('status-list');
+        
+        try {
+          const res = await fetch(`${API_BASE_URL}/reservations/check?phone=${encodeURIComponent(phone)}`);
+          const data = await res.json();
+          
+          if (data.length === 0) {
+            statusList.innerHTML = '<p>No reservations found with this phone number.</p>';
+          } else {
+            const statusBadges = {
+              'pending': '<span style="background:#fef3cd;color:#856404;padding:3px 10px;border-radius:10px;font-size:12px;">Pending</span>',
+              'confirmed': '<span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:10px;font-size:12px;">Confirmed</span>',
+              'completed': '<span style="background:#cce5ff;color:#004085;padding:3px 10px;border-radius:10px;font-size:12px;">Completed</span>',
+              'cancelled': '<span style="background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:10px;font-size:12px;">Cancelled</span>'
+            };
+            statusList.innerHTML = data.map(r => `
+              <div style="padding:15px;border-bottom:1px solid #eee;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <strong>${r.date} at ${r.time}</strong>
+                  ${statusBadges[r.status] || r.status}
+                </div>
+                <p style="margin:5px 0 0;font-size:14px;color:#666;">${r.guests} guest(s) • ${r.name}</p>
+              </div>
+            `).join('');
+          }
+          statusResult.style.display = 'block';
+        } catch (err) {
+          showToast('Error checking status. Please try again.', true);
+        }
+      });
+    }
+  </script>
 </body>
 </html>
