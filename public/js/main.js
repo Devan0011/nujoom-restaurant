@@ -323,9 +323,6 @@ function initReviewForm() {
       } else {
         showToast(result.error || 'Failed to submit review', true);
       }
-    } catch (error) {
-      showToast('Thank you for your feedback!');
-      reviewForm.reset();
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Review';
