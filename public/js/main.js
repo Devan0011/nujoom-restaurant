@@ -1,5 +1,4 @@
-const API_BASE_URL = window.getNujoomApiBaseUrl ? window.getNujoomApiBaseUrl() : '/api';
-
+const API_BASE_URL = window.location.origin + '/api';
 let allMenuItems = [];
 
 function showToast(message, isError = false) {
@@ -53,22 +52,22 @@ async function fetchReviews() {
   }
 }
 
-function renderReviews(reviews) {
+function renderReviews(reviewsList) {
   const reviewsGrid = document.getElementById('reviews-grid');
   if (!reviewsGrid) return;
   
-  if (!reviews || reviews.length === 0) {
+  if (!reviewsList || reviewsList.length === 0) {
     renderStaticReviews();
     return;
   }
 
-  reviewsGrid.innerHTML = reviews.slice(0, 6).map(review => `
+  reviewsGrid.innerHTML = reviewsList.slice(0, 6).map(review => `
     <div class="review-card">
       <div class="review-header">
         <img src="${review.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}&background=d4af37&color=0a0a0a`}" alt="${review.name}" class="review-avatar" onerror="this.src='https://via.placeholder.com/55x55?text=User'">
         <div class="review-info">
-          <h4>${review.name}</h4>
-          <span>${formatReviewDate(review.createdAt)}</span>
+          <h4>${escapeHtml(review.name)}</h4>
+          <span>${formatReviewDate(review.date)}</span>
         </div>
       </div>
       <div class="review-stars">${'<i class="fas fa-star"></i>'.repeat(review.rating)}${'<i class="far fa-star"></i>'.repeat(5 - review.rating)}</div>
@@ -137,7 +136,7 @@ function renderMenuItems(items) {
     card.style.animationDelay = `${index * 0.05}s`;
     card.innerHTML = `
       <div class="menu-card-image">
-        <img src="${item.image || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200'}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/100x100?text=Food'">
+        <img src="${item.image || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200'}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200?text=Food'">
       </div>
       <div class="menu-card-content">
         <div class="menu-card-header">
@@ -230,6 +229,10 @@ function initMenuTabs() {
   });
 }
 
+const WHATSAPP_NUMBER = "919876543210";
+const RESERVATION_TEXT = (data) => `*New Table Reservation Request*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone}%0A*Email:* ${data.email || 'N/A'}%0A*Date:* ${data.date}%0A*Time:* ${data.time}%0A*Guests:* ${data.guests}%0A*Special Requests:* ${data.specialRequests || 'None'}`;
+const REVIEW_TEXT = (data) => `*New Customer Review*%0A%0A*Name:* ${data.name}%0A*Phone:* ${data.phone || 'N/A'}%0A*Rating:* ${data.rating} Stars%0A*Review:* ${data.review}`;
+
 function initReservationForm() {
   const reservationForm = document.getElementById('reservation-form');
   if (!reservationForm) return;
@@ -263,6 +266,8 @@ function initReservationForm() {
       const result = await response.json();
 
       if (response.ok) {
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${RESERVATION_TEXT(data)}`;
+        window.open(whatsappUrl, '_blank');
         showToast(result.message || 'Reservation submitted successfully!');
         reservationForm.reset();
       } else {
@@ -321,7 +326,9 @@ function initReviewForm() {
         showToast(result.error || 'Failed to submit review', true);
       }
     } catch (error) {
-      showToast('Thank you for your feedback!', false);
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${REVIEW_TEXT(data)}`;
+      window.open(whatsappUrl, '_blank');
+      showToast('Thank you for your feedback!');
       reviewForm.reset();
     } finally {
       submitBtn.disabled = false;

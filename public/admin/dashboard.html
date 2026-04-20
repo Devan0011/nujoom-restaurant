@@ -3,280 +3,489 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="nujoom-api-base-url" content="">
-  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <title>Admin Dashboard | Nujoom Biriyani House</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    :root { --primary: #d4af37; --dark: #1a1a2e; --light: #f8f9fa; --danger: #e74c3c; --success: #27ae60; }
+    body { background: #f5f6fa; }
+    
+    .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: var(--dark); color: white; padding: 20px; z-index: 100; }
+    .sidebar h2 { color: var(--primary); margin-bottom: 30px; font-size: 22px; }
+    .sidebar ul { list-style: none; }
+    .sidebar li { margin-bottom: 8px; }
+    .sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: white; text-decoration: none; border-radius: 10px; transition: all 0.3s; }
+    .sidebar a:hover, .sidebar a.active { background: var(--primary); color: var(--dark); }
+    .sidebar .logout { margin-top: 50px; background: var(--danger); }
+    
+    .main { margin-left: 260px; padding: 30px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .header h1 { color: var(--dark); }
+    .header .user { display: flex; align-items: center; gap: 10px; }
+    
+    .card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); }
+    .card h3 { margin-bottom: 20px; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
+    
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); }
+    .stat-card h4 { color: #666; font-size: 14px; }
+    .stat-card .number { font-size: 36px; font-weight: 700; color: var(--primary); }
+    
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .tab { padding: 10px 20px; cursor: pointer; border-radius: 8px; transition: all 0.3s; }
+    .tab.active { background: var(--primary); color: white; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+    th { color: #666; font-weight: 600; font-size: 14px; }
+    .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge.pending { background: #fef3cd; color: #856404; }
+    .badge.confirmed { background: #d4edda; color: #155724; }
+    .badge.completed { background: #cce5ff; color: #004085; }
+    
+    .btn { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn:hover { opacity: 0.8; }
+    
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal h3 { margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #555; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; }
+    .form-group textarea { min-height: 80px; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    
+    .empty { text-align: center; padding: 40px; color: #999; }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 70px; padding: 15px; }
+      .sidebar h2, .sidebar a span { display: none; }
+      .sidebar a { justify-content: center; }
+      .main { margin-left: 70px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="admin-layout">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <a href="/" class="sidebar-logo">
-          <i class="fas fa-utensils"></i>
-          <span>Nujoom</span>
-        </a>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="#dashboard" class="nav-item active" data-section="dashboard">
-          <i class="fas fa-chart-pie"></i>
-          <span>Dashboard</span>
-        </a>
-        <a href="#menu" class="nav-item" data-section="menu">
-          <i class="fas fa-utensils"></i>
-          <span>Menu Items</span>
-        </a>
-        <a href="#reservations" class="nav-item" data-section="reservations">
-          <i class="fas fa-calendar-check"></i>
-          <span>Reservations</span>
-        </a>
-        <a href="#gallery" class="nav-item" data-section="gallery">
-          <i class="fas fa-images"></i>
-          <span>Gallery</span>
-        </a>
-        <a href="#reviews" class="nav-item" data-section="reviews">
-          <i class="fas fa-star"></i>
-          <span>Reviews</span>
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="#" id="logout-btn" class="nav-item">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Logout</span>
-        </a>
-        <a href="/" class="nav-item">
-          <i class="fas fa-external-link-alt"></i>
-          <span>View Website</span>
-        </a>
-      </div>
-    </aside>
+  <nav class="sidebar">
+    <h2><i class="fas fa-utensils"></i> Nujoom</h2>
+    <ul>
+      <li><a href="#" class="active" data-tab="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+      <li><a href="#" data-tab="menu"><i class="fas fa-utensils"></i> <span>Menu Items</span></a></li>
+      <li><a href="#" data-tab="gallery"><i class="fas fa-images"></i> <span>Gallery</span></a></li>
+      <li><a href="#" data-tab="reviews"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
+      <li><a href="#" data-tab="reservations"><i class="fas fa-calendar-alt"></i> <span>Reservations</span></a></li>
+      <li><a href="#" class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+    </ul>
+  </nav>
 
-    <main class="main-content">
-      <header class="admin-header">
-        <div class="header-left">
-          <button class="mobile-toggle" id="mobile-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h1 id="page-title">Dashboard</h1>
+  <main class="main">
+    <div class="header">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="user">
+        <span>Welcome, <strong id="adminName">Admin</strong></span>
+      </div>
+    </div>
+
+    <div id="dashboard" class="tab-content active">
+      <div class="stats">
+        <div class="stat-card">
+          <h4>Total Menu Items</h4>
+          <div class="number" id="statMenu">0</div>
         </div>
-        <div class="header-right">
-          <span class="admin-name" id="admin-name">Admin</span>
+        <div class="stat-card">
+          <h4>Total Reviews</h4>
+          <div class="number" id="statReviews">0</div>
         </div>
-      </header>
-
-      <div class="admin-body">
-        <section id="dashboard" class="admin-section active">
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(212, 175, 55, 0.15); color: #d4af37;">
-                <i class="fas fa-calendar-check"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-number" id="stat-total">0</span>
-                <span class="stat-label">Total Bookings</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(76, 175, 80, 0.15); color: #4caf50;">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-number" id="stat-pending">0</span>
-                <span class="stat-label">Pending</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(33, 150, 243, 0.15); color: #2196f3;">
-                <i class="fas fa-calendar-day"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-number" id="stat-today">0</span>
-                <span class="stat-label">Today's Bookings</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon" style="background: rgba(156, 39, 176, 0.15); color: #9c27b0;">
-                <i class="fas fa-calendar-alt"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-number" id="stat-month">0</span>
-                <span class="stat-label">This Month</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="recent-section">
-            <div class="section-header">
-              <h2>Recent Reservations</h2>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table" id="recent-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Guests</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="recent-tbody">
-                  <tr>
-                    <td colspan="6" class="loading-cell">
-                      <i class="fas fa-spinner fa-spin"></i> Loading...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="menu" class="admin-section">
-          <div class="section-header">
-            <h2>Menu Items</h2>
-            <button class="btn btn-primary" id="add-menu-btn">
-              <i class="fas fa-plus"></i> Add Item
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="menu-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Spice Level</th>
-                  <th>Featured</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="menu-tbody">
-                <tr>
-                  <td colspan="8" class="loading-cell">
-                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="reservations" class="admin-section">
-          <div class="section-header">
-            <h2>All Reservations</h2>
-            <div class="filter-group">
-              <select id="status-filter" class="filter-select">
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="completed">Completed</option>
-              </select>
-              <input type="date" id="date-filter" class="filter-input">
-              <button class="btn btn-secondary" id="filter-btn">
-                <i class="fas fa-filter"></i> Filter
-              </button>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="reservations-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Guests</th>
-                  <th>Special Requests</th>
-                  <th>Status</th>
-                  <th>Notify</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="reservations-tbody">
-                <tr>
-                  <td colspan="10" class="loading-cell">
-                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="gallery" class="admin-section">
-          <div class="section-header">
-            <h2>Gallery Images</h2>
-            <button class="btn btn-primary" id="add-gallery-btn">
-              <i class="fas fa-plus"></i> Add Image
-            </button>
-          </div>
-          <div class="gallery-admin-grid" id="gallery-admin-grid">
-            <div class="loading-gallery">
-              <i class="fas fa-spinner fa-spin"></i> Loading...
-            </div>
-          </div>
-        </section>
-
-        <section id="reviews" class="admin-section">
-          <div class="section-header">
-            <h2>Customer Reviews</h2>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="reviews-table">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Rating</th>
-                  <th>Review</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="reviews-tbody">
-                <tr>
-                  <td colspan="6" class="loading-cell">
-                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <div class="stat-card">
+          <h4>Reservations</h4>
+          <div class="number" id="statReservations">0</div>
+        </div>
+        <div class="stat-card">
+          <h4>Gallery Images</h4>
+          <div class="number" id="statGallery">0</div>
+        </div>
       </div>
-    </main>
-  </div>
+    </div>
 
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal">
-      <div class="modal-header">
-        <h3 id="modal-title">Modal Title</h3>
-        <button class="modal-close" id="modal-close">
-          <i class="fas fa-times"></i>
-        </button>
+    <div id="menu" class="tab-content">
+      <div class="card">
+        <h3>
+          Menu Items
+          <button class="btn btn-primary" onclick="openMenuModal()"><i class="fas fa-plus"></i> Add Item</button>
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Featured</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="menuTable"></tbody>
+        </table>
       </div>
-      <div class="modal-body" id="modal-body">
+    </div>
+
+    <div id="gallery" class="tab-content">
+      <div class="card">
+        <h3>
+          Gallery Images
+          <button class="btn btn-primary" onclick="openGalleryModal()"><i class="fas fa-plus"></i> Add Image</button>
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="galleryTable"></tbody>
+        </table>
       </div>
+    </div>
+
+    <div id="reviews" class="tab-content">
+      <div class="card">
+        <h3>Customer Reviews</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Rating</th>
+              <th>Review</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reviewsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="reservations" class="tab-content">
+      <div class="card">
+        <h3>Reservations</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Guests</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reservationsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal" id="menuModal">
+    <div class="modal-content">
+      <h3 id="menuModalTitle">Add Menu Item</h3>
+      <form id="menuForm">
+        <input type="hidden" id="menuId">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="menuName" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="menuDescription"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" id="menuPrice" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="menuCategory" required>
+            <option value="biriyani">Biriyani</option>
+            <option value="starters">Starters</option>
+            <option value="main-course">Main Course</option>
+            <option value="desserts">Desserts</option>
+            <option value="beverages">Beverages</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="url" id="menuImage">
+        </div>
+        <div class="form-group">
+          <label>Spice Level</label>
+          <select id="menuSpice">
+            <option value="mild">Mild</option>
+            <option value="medium">Medium</option>
+            <option value="spicy">Spicy</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preparation Time</label>
+          <input type="text" id="menuTime" placeholder="e.g., 25-35 min">
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="menuFeatured"> Featured Item</label>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn" onclick="closeMenuModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <div class="toast" id="toast">
-    <i class="toast-icon fas fa-check-circle"></i>
-    <span class="toast-message"></span>
+  <div class="modal" id="galleryModal">
+    <div class="modal-content">
+      <h3>Add Gallery Image</h3>
+      <form id="galleryForm">
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="url" id="galleryImageUrl" required>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="galleryTitle">
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn" onclick="closeGalleryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script src="../js/config.js"></script>
-  <script src="js/admin.js"></script>
+  <script>
+    const API_BASE = window.location.origin + '/api';
+    let token = localStorage.getItem('adminToken');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('adminName').textContent = localStorage.getItem('adminUser') || 'Admin';
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${token}` };
+    }
+
+    document.querySelectorAll('.sidebar a[data-tab]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tab = link.dataset.tab;
+        document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        document.getElementById('pageTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+      });
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      window.location.href = 'login.html';
+    });
+
+    async function loadDashboard() {
+      const [menu, reviews, reservations, gallery] = await Promise.all([
+        fetch(`${API_BASE}/menu`).then(r => r.json()),
+        fetch(`${API_BASE}/reviews`).then(r => r.json()),
+        fetch(`${API_BASE}/reservations`).then(r => r.json()),
+        fetch(`${API_BASE}/gallery`).then(r => r.json())
+      ]);
+      document.getElementById('statMenu').textContent = menu.length;
+      document.getElementById('statReviews').textContent = reviews.length;
+      document.getElementById('statReservations').textContent = reservations.length;
+      document.getElementById('statGallery').textContent = gallery.length;
+    }
+
+    async function loadMenu() {
+      const items = await fetch(`${API_BASE}/menu`).then(r => r.json());
+      document.getElementById('menuTable').innerHTML = items.map(item => `
+        <tr>
+          <td><img src="${item.image}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;"></td>
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>₹${item.price}</td>
+          <td>${item.isFeatured ? '<span class="badge confirmed">Yes</span>' : '-'}</td>
+          <td>
+            <button class="btn btn-primary" onclick="editMenu(${JSON.stringify(item).replace(/"/g, '&quot;')})"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger" onclick="deleteMenu(${item.id})"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadGallery() {
+      const images = await fetch(`${API_BASE}/gallery`).then(r => r.json());
+      document.getElementById('galleryTable').innerHTML = images.map(img => `
+        <tr>
+          <td><img src="${img.imageUrl}" style="width:80px;height:50px;object-fit:cover;border-radius:8px;"></td>
+          <td>${img.title || '-'}</td>
+          <td>
+            <button class="btn btn-danger" onclick="deleteGallery(${img.id})"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadReviews() {
+      const reviews = await fetch(`${API_BASE}/reviews`).then(r => r.json());
+      document.getElementById('reviewsTable').innerHTML = reviews.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
+          <td>${r.review?.substring(0, 50)}...</td>
+          <td>${r.date || '-'}</td>
+          <td>
+            <button class="btn btn-danger" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadReservations() {
+      const reservations = await fetch(`${API_BASE}/reservations`).then(r => r.json());
+      document.getElementById('reservationsTable').innerHTML = reservations.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.phone}</td>
+          <td>${r.date}</td>
+          <td>${r.time}</td>
+          <td>${r.guests}</td>
+          <td><span class="badge ${r.status}">${r.status}</span></td>
+          <td>
+            <button class="btn btn-success" onclick="updateReservation(${r.id}, 'confirmed')">Confirm</button>
+            <button class="btn btn-danger" onclick="deleteReservation(${r.id})"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" class="empty">No reservations yet</td></tr>';
+    }
+
+    function openMenuModal(item = null) {
+      document.getElementById('menuModal').classList.add('active');
+      document.getElementById('menuModalTitle').textContent = item ? 'Edit Menu Item' : 'Add Menu Item';
+      document.getElementById('menuId').value = item?.id || '';
+      document.getElementById('menuName').value = item?.name || '';
+      document.getElementById('menuDescription').value = item?.description || '';
+      document.getElementById('menuPrice').value = item?.price || '';
+      document.getElementById('menuCategory').value = item?.category || 'biriyani';
+      document.getElementById('menuImage').value = item?.image || '';
+      document.getElementById('menuSpice').value = item?.spiceLevel || 'medium';
+      document.getElementById('menuTime').value = item?.preparationTime || '';
+      document.getElementById('menuFeatured').checked = item?.isFeatured;
+    }
+
+    function closeMenuModal() {
+      document.getElementById('menuModal').classList.remove('active');
+    }
+
+    function editMenu(item) {
+      openMenuModal(item);
+    }
+
+    document.getElementById('menuForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('menuId').value;
+      const data = {
+        name: document.getElementById('menuName').value,
+        description: document.getElementById('menuDescription').value,
+        price: parseFloat(document.getElementById('menuPrice').value),
+        category: document.getElementById('menuCategory').value,
+        image: document.getElementById('menuImage').value,
+        spiceLevel: document.getElementById('menuSpice').value,
+        preparationTime: document.getElementById('menuTime').value,
+        isFeatured: document.getElementById('menuFeatured').checked
+      };
+
+      const url = id ? `${API_BASE}/admin/menu/${id}` : `${API_BASE}/admin/menu`;
+      const method = id ? 'PUT' : 'POST';
+
+      await fetch(url, { method, headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      closeMenuModal();
+      loadMenu();
+    });
+
+    async function deleteMenu(id) {
+      if (confirm('Delete this menu item?')) {
+        await fetch(`${API_BASE}/admin/menu/${id}`, { method: 'DELETE', headers: authHeaders() });
+        loadMenu();
+      }
+    }
+
+    function openGalleryModal() {
+      document.getElementById('galleryModal').classList.add('active');
+    }
+
+    function closeGalleryModal() {
+      document.getElementById('galleryModal').classList.remove('active');
+    }
+
+    document.getElementById('galleryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await fetch(`${API_BASE}/admin/gallery`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: document.getElementById('galleryImageUrl').value,
+          title: document.getElementById('galleryTitle').value
+        })
+      });
+      closeGalleryModal();
+      loadGallery();
+    });
+
+    async function deleteGallery(id) {
+      if (confirm('Delete this image?')) {
+        await fetch(`${API_BASE}/admin/gallery/${id}`, { method: 'DELETE', headers: authHeaders() });
+        loadGallery();
+      }
+    }
+
+    async function deleteReview(id) {
+      if (confirm('Delete this review?')) {
+        await fetch(`${API_BASE}/admin/reviews/${id}`, { method: 'DELETE', headers: authHeaders() });
+        loadReviews();
+      }
+    }
+
+    async function updateReservation(id, status) {
+      await fetch(`${API_BASE}/admin/reservations/${id}`, {
+        method: 'PUT',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadReservations();
+    }
+
+    async function deleteReservation(id) {
+      if (confirm('Delete this reservation?')) {
+        await fetch(`${API_BASE}/admin/reservations/${id}`, { method: 'DELETE', headers: authHeaders() });
+        loadReservations();
+      }
+    }
+
+    loadDashboard();
+    loadMenu();
+    loadGallery();
+    loadReviews();
+    loadReservations();
+  </script>
 </body>
 </html>

@@ -8,7 +8,6 @@
   <meta name="author" content="Nujoom Biriyani House">
   <meta property="og:title" content="Nujoom Biriyani House | Menu">
   <meta property="og:description" content="Explore our complete menu of authentic biriyanis and Hyderabadi cuisine.">
-  <meta name="nujoom-api-base-url" content="">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>Nujoom Biriyani House | Menu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +65,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-brand">
-          <a href="#" class="logo">
+          <a href="index.html" class="logo">
             <span class="logo-icon"><i class="fas fa-utensils"></i></span>
             <span class="logo-text">Nujoom</span>
           </a>
@@ -109,7 +108,93 @@
     }
   </style>
 
-  <script src="js/config.js"></script>
-  <script src="js/menu-page.js" defer></script>
+  <script src="js/main.js"></script>
+  <script>
+    const API_BASE_URL = window.location.origin + '/api';
+    let allMenuItems = [];
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function getSpiceEmoji(level) {
+      const map = {
+        'mild': '<i class="fas fa-seedling"></i>',
+        'medium': '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i>',
+        'spicy': '<i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i><i class="fas fa-pepper-hot"></i>'
+      };
+      return map[level] || map['medium'];
+    }
+
+    function renderMenuItems(items) {
+      const menuGrid = document.getElementById('menu-grid');
+      const menuLoading = document.getElementById('menu-loading');
+      if (!menuGrid) return;
+      
+      menuGrid.innerHTML = '';
+      if (menuLoading) menuLoading.style.display = 'none';
+
+      if (!items || items.length === 0) {
+        menuGrid.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:#666;padding:50px;font-size:16px;">No menu items available</p>';
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'menu-card';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.innerHTML = `
+          <div class="menu-card-image">
+            <img src="${item.image || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200'}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200?text=Food'">
+          </div>
+          <div class="menu-card-content">
+            <div class="menu-card-header">
+              <h3>${escapeHtml(item.name)}</h3>
+              <span class="menu-price">₹${item.price}</span>
+            </div>
+            <p>${escapeHtml(item.description)}</p>
+            <div class="menu-card-footer">
+              <span class="menu-time"><i class="far fa-clock"></i> ${escapeHtml(item.preparationTime || '20-30 min')}</span>
+              <span class="spice-badge ${item.spiceLevel || 'medium'}">${getSpiceEmoji(item.spiceLevel)}</span>
+            </div>
+          </div>
+        `;
+        menuGrid.appendChild(card);
+      });
+    }
+
+    function initMenuTabs() {
+      const menuTabs = document.querySelectorAll('.menu-tab');
+      menuTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          menuTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const category = tab.dataset.category;
+          const filtered = category === 'all' ? allMenuItems : allMenuItems.filter(item => item.category === category);
+          renderMenuItems(filtered);
+        });
+      });
+    }
+
+    async function fetchMenuItems() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/menu`);
+        if (!response.ok) throw new Error('Failed to fetch menu');
+        const items = await response.json();
+        allMenuItems = items;
+        renderMenuItems(items);
+      } catch (error) {
+        const menuLoading = document.getElementById('menu-loading');
+        if (menuLoading) menuLoading.innerHTML = '<p>Failed to load menu. Please refresh the page.</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchMenuItems();
+      initMenuTabs();
+    });
+  </script>
 </body>
 </html>

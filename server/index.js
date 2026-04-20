@@ -1,8 +1,8 @@
 const app = require('./app');
-const config = require('./config/env');
+const path = require('path');
 
-app.listen(config.port, "0.0.0.0", () => {
-  console.log(`Server running on port ${config.port}`);
-  console.log(`Environment: ${config.nodeEnv}`);
-  console.log(`Connected to Supabase: ${config.supabaseUrl ? 'Yes' : 'No'}`);
+const PORT = process.env.PORT || 8000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
