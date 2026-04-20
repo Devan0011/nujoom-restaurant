@@ -9,8 +9,8 @@ const SITE_CONFIG = {
   tagline: "Authentic Biriyani in Palakkad",
   
   // Phone numbers (without +91)
-  phone: "04912521234",
-  whatsapp: "9876543210",  // Just the number without country code
+  phone: "8848541003",
+  whatsapp: "8848541003",  // Just the number without country code
   
   // Address
   address: "Main Road, Near Clock Tower",
